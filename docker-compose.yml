@@ -1,0 +1,3 @@
+NAME := Social Media Api
+VERSION := 0.0.0
+BRANCH := main
