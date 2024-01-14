@@ -1,0 +1,17 @@
+info:
+  contact: {}
+paths:
+  /health:
+    get:
+      consumes:
+      - '*/*'
+      description: Get the status of server.
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+      summary: Show the status of server.
+      tags:
+      - Health
+swagger: "2.0"
