@@ -67,10 +67,8 @@ func (s *Server) healthCheck(ctx *fiber.Ctx) error {
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost
 // @BasePath /
 // @schemes http
-
 func (s *Server) Start() error {
 	address := fmt.Sprintf(":%s", s.config.ServerPort)
 	shutDownChan := make(chan os.Signal, 1)

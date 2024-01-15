@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"github.com/mehmetokdemir/social-media-api/internal/app/entity"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -28,30 +29,47 @@ func NewRepository(db *gorm.DB, logger *zap.SugaredLogger) IUserRepository {
 	}
 }
 
-func (u *userRepository) CreateUser(user entity.User) (*entity.User, error) {
-	return nil, nil
+func (r *userRepository) CreateUser(user entity.User) (*entity.User, error) {
+	if err := r.db.Create(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
-func (u *userRepository) GetUserById(id uint) (*entity.User, error) {
-	return nil, nil
+func (r *userRepository) GetUserById(id uint) (user *entity.User, err error) {
+	if err = r.db.Model(&entity.User{}).Where("ID =?", id).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
-func (u *userRepository) GetUserByUsername(username string) (*entity.User, error) {
-	return nil, nil
+func (r *userRepository) GetUserByUsername(username string) (user *entity.User, err error) {
+	if err = r.db.Model(&entity.User{}).Where("username =?", username).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
-func (u *userRepository) IsUserExistWithSameUsername(username string) bool {
+func (r *userRepository) IsUserExistWithSameEmail(email string) bool {
+	return r.isUserExistWithCredential("email", email)
+}
+
+func (r *userRepository) isUserExistWithCredential(key, value string) bool {
+	var user *entity.User
+	if err := r.db.Where(fmt.Sprintf("%s =?", key), value).First(&user).Error; err == nil && user != nil {
+		return true
+	}
 	return false
 }
 
-func (u *userRepository) IsUserExistWithSameEmail(email string) bool {
-	return false
+func (r *userRepository) IsUserExistWithSameUsername(username string) bool {
+	return r.isUserExistWithCredential("username", username)
 }
 
-func (u *userRepository) UpdateProfilePhoto(photo string) error {
+func (r *userRepository) UpdateProfilePhoto(photo string) error {
 	return nil
 }
 
-func (u *userRepository) Migration() error {
-	return u.db.AutoMigrate(entity.User{})
+func (r *userRepository) Migration() error {
+	return r.db.AutoMigrate(entity.User{})
 }

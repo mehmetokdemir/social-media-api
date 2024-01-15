@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/arsmn/fiber-swagger/v2 v2.31.1
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gofiber/fiber/v2 v2.52.0
 	github.com/joho/godotenv v1.5.1
 	github.com/swaggo/swag v1.8.7

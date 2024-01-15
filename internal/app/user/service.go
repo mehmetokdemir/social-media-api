@@ -1,47 +1,55 @@
 package user
 
 import (
+	"errors"
 	"github.com/mehmetokdemir/social-media-api/internal/app/entity"
+	"github.com/mehmetokdemir/social-media-api/internal/config"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type IUserService interface {
 	CreateUser(user entity.User) (*entity.User, error)
-	CreateToken(username, password string) (string, error)
-	VerifyPassword(hashedPassword, requestedPassword string) bool
-	HashPassword(password string) (string, error)
 }
 
 type userService struct {
+	config         config.Config
 	logger         *zap.SugaredLogger
 	userRepository IUserRepository
 }
 
-func NewUserService(userRepository IUserRepository, logger *zap.SugaredLogger) IUserService {
+func NewUserService(userRepository IUserRepository, logger *zap.SugaredLogger, config config.Config) IUserService {
+	if userRepository == nil {
+		return nil
+	}
+
 	return &userService{
+		config:         config,
 		userRepository: userRepository,
 		logger:         logger,
 	}
 }
 
-func (u *userService) CreateUser(user entity.User) (*entity.User, error) {
-	return nil, nil
-}
-
-func (u *userService) CreateToken(username, password string) (string, error) {
-	return "", nil
-}
-
-// TODO: Not need just use on the service for helper methods
-func (u *userService) VerifyPassword(hashedPassword, requestedPassword string) bool {
-	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(requestedPassword)); err == nil {
-		return true
+func (s *userService) CreateUser(user entity.User) (*entity.User, error) {
+	if s.userRepository.IsUserExistWithSameEmail(user.Email) || s.userRepository.IsUserExistWithSameUsername(user.Username) {
+		return nil, errors.New("duplicated user")
 	}
-	return false
+
+	hashedPassword, err := s.hashPassword(user.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Password = hashedPassword
+	createdUser, err := s.userRepository.CreateUser(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdUser, nil
 }
 
-func (u *userService) HashPassword(password string) (string, error) {
+func (s *userService) hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }

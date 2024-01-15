@@ -1,6 +1,221 @@
+definitions:
+  auth.LoginRequest:
+    properties:
+      password:
+        description: Password of the user
+        example: TopSecret!!!
+        type: string
+        x-order: "2"
+      username:
+        description: Username of the user
+        example: john
+        type: string
+        x-order: "1"
+    required:
+    - password
+    - username
+    type: object
+  auth.LoginResponse:
+    properties:
+      email:
+        example: john@gmail.com
+        type: string
+        x-order: "2"
+      token_hash:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyIjp7IklEIjozLCJVc2VybmFtZSI6Impob24iLCJFbWFpbCI6ImpvaG5AZ21haWwuY29tIiwiUGFzc3dvcmQiOiIkMmEkMTAkRkFUb1ZsS2Y2VmZIRGtYL1dLWmVRT0o2U1kuU3Z0SnNYYmhZV2FlTnBrbjU3S0hlNk4vZTIiLCJEZWZhdWx0Q3VycmVuY3lDb2RlIjoiIiwiY3JlYXRlZF9hdCI6IjIwMjItMTEtMjNUMjI6MjA6MDkuMzk0NzQ3KzAzOjAwIiwidXBkYXRlZF9hdCI6IjIwMjItMTEtMjNUMjI6MjA6MDkuMzk0NzQ3KzAzOjAwIiwiZGVsZXRlZF9hdCI6bnVsbH0sImV4cCI6MTY2OTM4OTM3MH0.b_i6GhYzqOp0VvouVi0rw2VG43UZx7lnJXqNEAKMH8o
+        type: string
+        x-order: "2"
+      username:
+        example: john
+        type: string
+        x-order: "1"
+    type: object
+  user.RegisterRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+      username:
+        type: string
+    type: object
+  user.RegisterResponse:
+    properties:
+      email:
+        example: john@gmail.com
+        type: string
+        x-order: "2"
+      username:
+        example: john
+        type: string
+        x-order: "1"
+    type: object
 info:
   contact: {}
 paths:
+  /Friendship/add:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Add user as friend
+      tags:
+      - Friendship
+  /Friendship/delete:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Delete user as friend
+      tags:
+      - Friendship
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      parameters:
+      - description: body params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/auth.LoginResponse'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Login user
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      parameters:
+      - description: body params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/auth.LoginResponse'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Logout user
+      tags:
+      - Auth
+  /comment/create:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create comment
+      tags:
+      - Comment
+  /comment/delete:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create post
+      tags:
+      - Comment
+  /comment/get:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create post
+      tags:
+      - Comment
+  /comment/list:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create post
+      tags:
+      - Comment
+  /comment/update:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create post
+      tags:
+      - Comment
   /health:
     get:
       consumes:
@@ -14,4 +229,105 @@ paths:
       summary: Show the status of server.
       tags:
       - Health
+  /post/create:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create post
+      tags:
+      - Post
+  /post/delete:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create post
+      tags:
+      - Post
+  /post/get:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create post
+      tags:
+      - Post
+  /post/list:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create post
+      tags:
+      - Post
+  /post/update:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create post
+      tags:
+      - Post
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: authenticates given user by giving an access jwttoken.
+      parameters:
+      - description: body params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user.RegisterResponse'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Authenticate user
+      tags:
+      - User
 swagger: "2.0"

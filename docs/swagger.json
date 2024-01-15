@@ -4,6 +4,247 @@
         "contact": {}
     },
     "paths": {
+        "/Friendship/add": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendship"
+                ],
+                "summary": "Add user as friend",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/Friendship/delete": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendship"
+                ],
+                "summary": "Delete user as friend",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login user",
+                "parameters": [
+                    {
+                        "description": "body params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout user",
+                "parameters": [
+                    {
+                        "description": "body params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/comment/create": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Create comment",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/comment/delete": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Create post",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/comment/get": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Create post",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/comment/list": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Create post",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/comment/update": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Create post",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Get the status of server.",
@@ -21,6 +262,242 @@
                     "404": {
                         "description": "Not Found"
                     }
+                }
+            }
+        },
+        "/post/create": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Post"
+                ],
+                "summary": "Create post",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/post/delete": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Post"
+                ],
+                "summary": "Create post",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/post/get": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Post"
+                ],
+                "summary": "Create post",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/post/list": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Post"
+                ],
+                "summary": "Create post",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/post/update": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Post"
+                ],
+                "summary": "Create post",
+                "responses": {
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/user/register": {
+            "post": {
+                "description": "authenticates given user by giving an access jwttoken.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Authenticate user",
+                "parameters": [
+                    {
+                        "description": "body params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/user.RegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "auth.LoginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "username": {
+                    "description": "Username of the user",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "john"
+                },
+                "password": {
+                    "description": "Password of the user",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "TopSecret!!!"
+                }
+            }
+        },
+        "auth.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "john"
+                },
+                "email": {
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "john@gmail.com"
+                },
+                "token_hash": {
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyIjp7IklEIjozLCJVc2VybmFtZSI6Impob24iLCJFbWFpbCI6ImpvaG5AZ21haWwuY29tIiwiUGFzc3dvcmQiOiIkMmEkMTAkRkFUb1ZsS2Y2VmZIRGtYL1dLWmVRT0o2U1kuU3Z0SnNYYmhZV2FlTnBrbjU3S0hlNk4vZTIiLCJEZWZhdWx0Q3VycmVuY3lDb2RlIjoiIiwiY3JlYXRlZF9hdCI6IjIwMjItMTEtMjNUMjI6MjA6MDkuMzk0NzQ3KzAzOjAwIiwidXBkYXRlZF9hdCI6IjIwMjItMTEtMjNUMjI6MjA6MDkuMzk0NzQ3KzAzOjAwIiwiZGVsZXRlZF9hdCI6bnVsbH0sImV4cCI6MTY2OTM4OTM3MH0.b_i6GhYzqOp0VvouVi0rw2VG43UZx7lnJXqNEAKMH8o"
+                }
+            }
+        },
+        "user.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "john"
+                },
+                "email": {
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "john@gmail.com"
                 }
             }
         }
