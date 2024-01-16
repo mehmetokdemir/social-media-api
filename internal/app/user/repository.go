@@ -9,7 +9,7 @@ import (
 
 type IUserRepository interface {
 	CreateUser(user entity.User) (*entity.User, error)
-	UpdateProfilePhoto(photo string) error
+	Update(user entity.User) (*entity.User, error)
 	GetUserByUsername(username string) (*entity.User, error)
 	GetUserById(id uint) (*entity.User, error)
 	IsUserExistWithSameUsername(username string) bool
@@ -37,7 +37,7 @@ func (r *userRepository) CreateUser(user entity.User) (*entity.User, error) {
 }
 
 func (r *userRepository) GetUserById(id uint) (user *entity.User, err error) {
-	if err = r.db.Model(&entity.User{}).Where("ID =?", id).First(&user).Error; err != nil {
+	if err = r.db.Model(&entity.User{}).Where("id =?", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return user, nil
@@ -66,8 +66,11 @@ func (r *userRepository) IsUserExistWithSameUsername(username string) bool {
 	return r.isUserExistWithCredential("username", username)
 }
 
-func (r *userRepository) UpdateProfilePhoto(photo string) error {
-	return nil
+func (r *userRepository) Update(user entity.User) (*entity.User, error) {
+	if err := r.db.Model(entity.User{}).Where("id =?", user.ID).Updates(user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (r *userRepository) Migration() error {

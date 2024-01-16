@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	j "github.com/mehmetokdemir/social-media-api/internal/app/common/jwttoken"
+	"github.com/mehmetokdemir/social-media-api/internal/app/entity"
 	"github.com/mehmetokdemir/social-media-api/internal/app/user"
 	"github.com/mehmetokdemir/social-media-api/internal/config"
 	"go.uber.org/zap"
@@ -17,26 +18,28 @@ type IAuthService interface {
 }
 
 type authService struct {
-	config         config.Config
-	logger         *zap.SugaredLogger
-	userRepository user.IUserRepository
+	config              config.Config
+	logger              *zap.SugaredLogger
+	userService         user.IUserService
+	blackListRepository IBlackListRepository
 }
 
-func NewAuthService(userRepository user.IUserRepository, logger *zap.SugaredLogger, config config.Config) IAuthService {
-	if userRepository == nil {
+func NewAuthService(userService user.IUserService, blackListRepository IBlackListRepository, logger *zap.SugaredLogger, config config.Config) IAuthService {
+	if blackListRepository == nil {
 		return nil
 	}
 
 	return &authService{
-		config:         config,
-		userRepository: userRepository,
-		logger:         logger,
+		config:              config,
+		userService:         userService,
+		blackListRepository: blackListRepository,
+		logger:              logger,
 	}
 }
 
 func (s *authService) CreateToken(username, password string) (*LoginResponse, error) {
 
-	userByUsername, err := s.userRepository.GetUserByUsername(username)
+	userByUsername, err := s.userService.GetUserByUsername(username)
 	if err != nil {
 		return nil, err
 	}
@@ -59,6 +62,10 @@ func (s *authService) CreateToken(username, password string) (*LoginResponse, er
 		return nil, errors.New("can not sign jwttoken")
 	}
 
+	if s.blackListRepository.CheckTokenInBlacklist(tokenString) {
+		return nil, errors.New("invalid token")
+	}
+
 	return &LoginResponse{
 		Username:  userByUsername.Username,
 		Email:     userByUsername.Email,
@@ -74,8 +81,7 @@ func (s *authService) verifyPassword(hashedPassword, requestedPassword string) b
 }
 
 func (s *authService) DeleteToken(token string) error {
-
-	// TODO: ?
-
-	return nil
+	return s.blackListRepository.CreateTokenToBlackList(entity.BlackList{
+		Token: token,
+	})
 }

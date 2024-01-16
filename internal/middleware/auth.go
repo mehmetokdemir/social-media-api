@@ -3,6 +3,7 @@ package middleware
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
+	"github.com/mehmetokdemir/social-media-api/internal/app/common/constants"
 	j "github.com/mehmetokdemir/social-media-api/internal/app/common/jwttoken"
 )
 
@@ -25,7 +26,7 @@ func AuthMiddleware(jwtPrivateKey string) fiber.Handler {
 			})
 		}
 
-		c.Locals("user_id", tk.UserId)
+		c.Locals(constants.UserIdKey, tk.UserId)
 		return c.Next()
 	}
 }

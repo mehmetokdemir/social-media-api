@@ -20,6 +20,9 @@ type Config struct {
 	AppEnv                 string `mapstructure:"APP_ENV"`
 	JwtATPrivateKey        string `mapstructure:"JWT_AT_PRIVATE_KEY"`
 	JwtATExpirationMinutes int    `mapstructure:"JWT_AT_EXPIRATION_MIN"`
+	CloudinaryCloudName    string `mapstructure:"CLOUDINARY_CLOUD_NAME"`
+	CloudinaryApiKey       string `mapstructure:"CLOUDINARY_API_KEY"`
+	CloudinaryApiSecret    string `mapstructure:"CLOUDINARY_API_SECRET"`
 }
 
 func NewConfig() Config {
@@ -45,6 +48,9 @@ func NewConfig() Config {
 		AppEnv:                 os.Getenv("APP_ENV"),
 		JwtATPrivateKey:        os.Getenv("JWT_AT_PRIVATE_KEY"),
 		JwtATExpirationMinutes: jwtExpirationMin,
+		CloudinaryCloudName:    os.Getenv("CLOUDINARY_CLOUD_NAME"),
+		CloudinaryApiKey:       os.Getenv("CLOUDINARY_API_KEY"),
+		CloudinaryApiSecret:    os.Getenv("CLOUDINARY_API_SECRET"),
 	}
 }
 

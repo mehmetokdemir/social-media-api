@@ -7,7 +7,10 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	_ "github.com/mehmetokdemir/social-media-api/docs"
 	"github.com/mehmetokdemir/social-media-api/internal/config"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,6 +28,8 @@ type Server struct {
 
 func New(handlers []Handler, config config.Config, logger *zap.SugaredLogger) *Server {
 	app := fiber.New()
+	// app.Use(middleware.PrometheusMiddleware(requestsTotal, cpuUsage))
+
 	app.Use(cors.New(cors.ConfigDefault))
 	for _, handler := range handlers {
 		handler.RegisterRoutes(app)
@@ -70,6 +75,29 @@ func (s *Server) healthCheck(ctx *fiber.Ctx) error {
 // @BasePath /
 // @schemes http
 func (s *Server) Start() error {
+	// Register the metrics.
+	requestsTotal := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "requests_total",
+		Help: "The total number of requests.",
+	})
+	cpuUsage := prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "cpu_usage",
+		Help: "The current CPU usage.",
+	})
+	responseTimes := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Name: "response_times",
+		Help: "The response times for requests.",
+	})
+	requestSizes := prometheus.NewSummary(prometheus.SummaryOpts{
+		Name: "request_sizes",
+		Help: "The sizes of requests.",
+	})
+	prometheus.MustRegister(requestsTotal, cpuUsage, responseTimes, requestSizes)
+	httpHandler := promhttp.Handler()
+
+	// Handle the metrics endpoint.
+	http.Handle("/metrics", httpHandler)
+
 	address := fmt.Sprintf(":%s", s.config.ServerPort)
 	shutDownChan := make(chan os.Signal, 1)
 	signal.Notify(shutDownChan, os.Interrupt, syscall.SIGTERM)

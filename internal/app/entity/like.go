@@ -2,18 +2,18 @@ package entity
 
 import "gorm.io/gorm"
 
-type LikeType string
+type ContentType string
 
 const (
-	PostLike    LikeType = "post"
-	CommentLike LikeType = "comment"
+	ContentTypePost    ContentType = "post"
+	ContentTypeComment ContentType = "comment"
 )
 
-// TODO: not sure ?
 type Like struct {
 	gorm.Model
-	UserID          uint `gorm:"column:user_id"`
-	User            User `gorm:"foreignkey:UserID"`
-	Type            LikeType
-	PostOrCommentID uint
+	UserID      uint        `gorm:"column:user_id"`
+	User        User        `gorm:"foreignkey:UserID"`
+	ContentType ContentType `gorm:"column:content_type"`
+
+	ContentID uint `gorm:"column:content_id"` // Post or Comment ID
 }

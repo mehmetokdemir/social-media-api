@@ -30,6 +30,215 @@ definitions:
         type: string
         x-order: "1"
     type: object
+  comment.CreateRequest:
+    properties:
+      body:
+        description: Body of the post
+        example: New Post...
+        type: string
+        x-order: "2"
+      parent_id:
+        description: ID of the parent comment id
+        example: 1
+        type: integer
+        x-order: "3"
+      post_id:
+        description: ID of the post
+        example: 1
+        type: integer
+        x-order: "1"
+    required:
+    - body
+    - post_id
+    type: object
+  comment.UpdateRequest:
+    properties:
+      body:
+        description: Body of the post
+        example: "3"
+        type: string
+        x-order: "3"
+      id:
+        description: ID of the comment
+        example: 1
+        type: integer
+        x-order: "1"
+      post_id:
+        description: ID of the post
+        example: 3
+        type: integer
+        x-order: "2"
+    required:
+    - body
+    - id
+    - post_id
+    type: object
+  entity.Comment:
+    properties:
+      body:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      image:
+        type: string
+      parenId:
+        type: integer
+      post:
+        $ref: '#/definitions/entity.Post'
+      postID:
+        type: integer
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/entity.User'
+      userID:
+        type: integer
+    type: object
+  entity.Post:
+    properties:
+      body:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      image:
+        type: string
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/entity.User'
+      userID:
+        type: integer
+    type: object
+  entity.User:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      password:
+        type: string
+      phoneNumber:
+        type: string
+      profilePhoto:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+  friendship.ReadFriendship:
+    properties:
+      created_at:
+        type: string
+      id:
+        description: ID of the friendship request
+        type: integer
+      receiver:
+        $ref: '#/definitions/friendship.ReadFriendshipUser'
+      sender:
+        $ref: '#/definitions/friendship.ReadFriendshipUser'
+      status:
+        type: string
+    type: object
+  friendship.ReadFriendshipUser:
+    properties:
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  httpmodel.CreateResponse:
+    properties:
+      id:
+        description: ID of the created model`
+        example: 1
+        type: integer
+        x-order: "1"
+    type: object
+  httpmodel.UpdateImageResponse:
+    properties:
+      uploaded_file_name:
+        description: Uploaded file name
+        example: https://res-cdn.com/postId
+        type: string
+        x-order: "1"
+    type: object
+  httpresponse.Response:
+    properties:
+      data:
+        x-order: "5"
+      error:
+        $ref: '#/definitions/httpresponse.ResponseError'
+        x-order: "4"
+      status_code:
+        example: 200
+        type: integer
+        x-order: "2"
+      success:
+        example: true
+        type: boolean
+        x-order: "1"
+    type: object
+  httpresponse.ResponseError:
+    properties:
+      detail:
+        example: user not found
+        type: string
+        x-order: "2"
+      message:
+        example: NOT_FOUND
+        type: string
+        x-order: "1"
+    type: object
+  post.CreateRequest:
+    properties:
+      body:
+        type: string
+    type: object
+  post.ReadPostResponse:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+    type: object
+  post.UpdateRequest:
+    properties:
+      body:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+    type: object
   user.RegisterRequest:
     properties:
       email:
@@ -59,41 +268,11 @@ definitions:
 info:
   contact: {}
 paths:
-  /Friendship/add:
-    post:
-      consumes:
-      - application/json
-      description: authenticates given user by giving an access jwttoken.
-      produces:
-      - application/json
-      responses:
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      summary: Add user as friend
-      tags:
-      - Friendship
-  /Friendship/delete:
-    post:
-      consumes:
-      - application/json
-      description: authenticates given user by giving an access jwttoken.
-      produces:
-      - application/json
-      responses:
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      summary: Delete user as friend
-      tags:
-      - Friendship
   /auth/login:
     post:
       consumes:
       - application/json
-      description: authenticates given user by giving an access jwttoken.
+      description: Create token with given credentials
       parameters:
       - description: body params
         in: body
@@ -104,8 +283,8 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/auth.LoginResponse'
         "400":
@@ -119,21 +298,20 @@ paths:
     post:
       consumes:
       - application/json
-      description: authenticates given user by giving an access jwttoken.
+      description: Delete session with given access token.
       parameters:
-      - description: body params
-        in: body
-        name: request
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
         required: true
-        schema:
-          $ref: '#/definitions/auth.LoginRequest'
+        type: string
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: Success
           schema:
-            $ref: '#/definitions/auth.LoginResponse'
+            $ref: '#/definitions/httpresponse.Response'
         "400":
           description: Bad Request
         "500":
@@ -145,10 +323,26 @@ paths:
     post:
       consumes:
       - application/json
-      description: authenticates given user by giving an access jwttoken.
+      description: Create comment from payload with POST method; need Authorization
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: body params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/comment.CreateRequest'
       produces:
       - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httpmodel.CreateResponse'
         "400":
           description: Bad Request
         "500":
@@ -156,66 +350,321 @@ paths:
       summary: Create comment
       tags:
       - Comment
-  /comment/delete:
-    post:
+  /comment/delete/{comment_id}:
+    delete:
       consumes:
       - application/json
-      description: authenticates given user by giving an access jwttoken.
+      description: Delete comment by comment id
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the comment to delete
+        in: path
+        name: comment_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/httpresponse.Response'
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
-      summary: Create post
+      summary: Delete Comment
       tags:
       - Comment
-  /comment/get:
-    post:
+  /comment/get/{comment_id}:
+    get:
       consumes:
       - application/json
-      description: authenticates given user by giving an access jwttoken.
+      description: Get comment by id. This id must be taken from path and need authorization
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the comment to get comment
+        in: path
+        name: comment_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/entity.Comment'
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
-      summary: Create post
+      summary: Get Comment BY ID
       tags:
       - Comment
-  /comment/list:
-    post:
+  /comment/list/{post_id}:
+    get:
       consumes:
       - application/json
-      description: authenticates given user by giving an access jwttoken.
+      description: List comments with giving post_id which is requested from params.
+        Authenticates given user by giving an access jwttoken.
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the post to list comments
+        in: path
+        name: post_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
+        "200":
+          description: Success
+          schema:
+            items:
+              $ref: '#/definitions/entity.Comment'
+            type: array
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
-      summary: Create post
+      summary: List comments by post id
       tags:
       - Comment
   /comment/update:
-    post:
+    put:
       consumes:
       - application/json
-      description: authenticates given user by giving an access jwttoken.
+      description: Update comment from payload with PUT method; need Authorization
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: body params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/comment.UpdateRequest'
       produces:
       - application/json
       responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/httpresponse.Response'
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
-      summary: Create post
+      summary: Update Comment By ID
       tags:
       - Comment
+  /comment/update/{comment_id}/image:
+    put:
+      consumes:
+      - application/json
+      description: Update comment image with authenticated user
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the comment to update the image for
+        in: path
+        name: comment_id
+        required: true
+        type: string
+      - description: The image file to upload
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httpmodel.UpdateImageResponse'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      tags:
+      - Comment
+  /friendship/accept/{request_id}:
+    post:
+      consumes:
+      - application/json
+      description: Accept user from pending friendship request, this endpoint needs
+        authentication
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the user to add as friendship
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/httpresponse.Response'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Accept user from pending friendship request
+      tags:
+      - Friendship
+  /friendship/add/{user_id}:
+    post:
+      consumes:
+      - application/json
+      description: Add user as a friend, this endpoint needs authentication
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the user to add as friendship
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/httpresponse.Response'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Add user as friend
+      tags:
+      - Friendship
+  /friendship/list/{status}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        List friendship by status, if status empty it will return all data. Status is enum v
+        Status is enum values and get; pending and accepted values
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: Filter with status it takes enum values which are; pending, accepted
+          and also empty string. if status is empty string all documents will return
+        in: path
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            items:
+              $ref: '#/definitions/friendship.ReadFriendship'
+            type: array
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: List friendship
+      tags:
+      - Friendship
+  /friendship/reject/{request_id}:
+    post:
+      consumes:
+      - application/json
+      description: Reject user from pending friendship request, this endpoint needs
+        authentication
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the user to add as friendship
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/httpresponse.Response'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Reject user from pending friendship request
+      tags:
+      - Friendship
+  /friendship/remove/{request_id}:
+    post:
+      consumes:
+      - application/json
+      description: Remove user from friend, this endpoint needs authentication
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the request to be removed which is in list in friendship
+          endpoint
+        in: path
+        name: request_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/httpresponse.Response'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Remove user from friend
+      tags:
+      - Friendship
   /health:
     get:
       consumes:
@@ -229,14 +678,92 @@ paths:
       summary: Show the status of server.
       tags:
       - Health
+  /like/comments/{comment_id}:
+    post:
+      consumes:
+      - application/json
+      description: Like comment by comment id. This id must be taken from path and
+        need authorization
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the comment to be liked
+        in: path
+        name: comment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/httpresponse.Response'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Like Comment
+      tags:
+      - Like
+  /like/posts/{post_id}:
+    post:
+      consumes:
+      - application/json
+      description: Like post by post id. This id must be taken from path and need
+        authorization
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the post to be liked
+        in: path
+        name: post_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/httpresponse.Response'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Like Post
+      tags:
+      - Like
   /post/create:
     post:
       consumes:
       - application/json
-      description: authenticates given user by giving an access jwttoken.
+      description: Create post from body with authenticated user
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: body params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/post.CreateRequest'
       produces:
       - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httpmodel.CreateResponse'
         "400":
           description: Bad Request
         "500":
@@ -244,67 +771,183 @@ paths:
       summary: Create post
       tags:
       - Post
-  /post/delete:
-    post:
+  /post/delete/{post_id}:
+    delete:
       consumes:
       - application/json
       description: authenticates given user by giving an access jwttoken.
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the post to delete
+        in: path
+        name: post_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/httpresponse.Response'
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
-      summary: Create post
+      summary: Delete post
       tags:
       - Post
-  /post/get:
-    post:
+  /post/get/{post_id}:
+    get:
       consumes:
       - application/json
       description: authenticates given user by giving an access jwttoken.
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/post.ReadPostResponse'
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
-      summary: Create post
+      summary: Get post by id post
       tags:
       - Post
   /post/list:
-    post:
+    get:
       consumes:
       - application/json
       description: authenticates given user by giving an access jwttoken.
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
+        "200":
+          description: Success
+          schema:
+            items:
+              $ref: '#/definitions/post.ReadPostResponse'
+            type: array
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
-      summary: Create post
+      summary: List post
       tags:
       - Post
   /post/update:
-    post:
+    put:
       consumes:
       - application/json
-      description: authenticates given user by giving an access jwttoken.
+      description: Update post from body with authenticated user
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: body params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/post.UpdateRequest'
       produces:
       - application/json
       responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/httpresponse.Response'
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
-      summary: Create post
       tags:
       - Post
-  /user/register:
+  /post/update/{post_id}/image:
+    put:
+      consumes:
+      - application/json
+      description: Update post image with authenticated user
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: ID of the post to update the image for
+        in: path
+        name: post_id
+        required: true
+        type: string
+      - description: The image file to upload
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httpmodel.UpdateImageResponse'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      tags:
+      - Post
+  /private/update/photo:
+    put:
+      consumes:
+      - application/json
+      description: Update profile pic with authentication
+      parameters:
+      - description: Auth token of logged-in user.
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      - description: The image file to upload
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httpmodel.UpdateImageResponse'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Update own profile pic
+      tags:
+      - User
+  /public/register:
     post:
       consumes:
       - application/json
@@ -319,8 +962,8 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/user.RegisterResponse'
         "400":

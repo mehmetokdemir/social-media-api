@@ -33,15 +33,22 @@ run:
 	@echo "[RUN] Running the service"
 	./bin/social-media-api
 
-.PHONY: run-with-docker
-run-with-docker:
-	@echo "[RUN] Running the service as a docker image"
-	docker-compose up --build
 
 .PHONY: rwgocommand
 rwgocommand:
 	@echo "[RUN] Running the service"
 	go run .
+
+
+.PHONY: build-docker
+build-docker:
+	@echo "[BUILD] Building the service with docker"
+	docker-compose build
+
+.PHONY: run-docker
+run-docker:
+	@echo "[RUN] Running the service with docker"
+	docker-compose up
 
 .PHONY: git
 git:

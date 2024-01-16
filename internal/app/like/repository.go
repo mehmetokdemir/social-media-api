@@ -7,9 +7,16 @@ import (
 )
 
 type ILikeRepository interface {
-	// todo: burdan devam
+	Like(like entity.Like) (*entity.Like, error)
 
-	Create(post entity.Post) (*entity.Post, error)
+	IsPostExist(postID uint) bool
+	IsCommentExist(commentID uint) bool
+
+	IsPostLikedByUser(userID uint, postID uint) (bool, error)
+	IsCommentLikedByUser(userID uint, commentID uint) (bool, error)
+
+	GetLikesByID(contentID uint, contentType entity.ContentType) ([]*entity.Like, error)
+	DeleteLikes(id uint, contentType entity.ContentType) error
 	Migration() error
 }
 
@@ -25,11 +32,69 @@ func NewRepository(db *gorm.DB, logger *zap.SugaredLogger) ILikeRepository {
 	}
 }
 
-func (r *likeRepository) Create(post entity.Post) (*entity.Post, error) {
-	if err := r.db.Create(&post).Error; err != nil {
+func (r *likeRepository) Like(like entity.Like) (*entity.Like, error) {
+	if err := r.db.Create(&like).Error; err != nil {
 		return nil, err
 	}
-	return &post, nil
+	return &like, nil
+}
+
+func (r *likeRepository) IsPostExist(postID uint) bool {
+	var post *entity.Post
+	if err := r.db.Model(&entity.Post{}).Where("id =?", postID).First(&post).Error; err != nil || post == nil {
+		return false
+	}
+
+	return true
+}
+
+func (r *likeRepository) IsCommentExist(commentID uint) bool {
+	var comment *entity.Comment
+	if err := r.db.Model(&entity.Comment{}).Where("id =?", commentID).First(&comment).Error; err != nil || comment == nil {
+		return false
+	}
+
+	return true
+}
+
+func (r *likeRepository) IsPostLikedByUser(userID, postID uint) (bool, error) {
+	var like entity.Like
+	if err := r.db.Where("user_id = ? AND content_type = ? AND content_id = ?", userID, entity.ContentTypePost, postID).First(&like).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			return false, nil
+		default:
+			return true, err
+		}
+	}
+
+	return true, nil
+}
+
+func (r *likeRepository) IsCommentLikedByUser(userID, commentID uint) (bool, error) {
+	var like entity.Like
+	if err := r.db.Where("user_id = ? AND content_type = ? AND content_id = ?", userID, entity.ContentTypeComment, commentID).First(&like).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			return false, nil
+		default:
+			return true, err
+		}
+	}
+
+	return true, nil
+}
+
+func (r *likeRepository) GetLikesByID(contentID uint, contentType entity.ContentType) ([]*entity.Like, error) {
+	var likes []*entity.Like
+	if err := r.db.Model(&entity.Like{}).Where("content_id = ? AND content_type = ?", contentID, contentType).Find(&likes).Error; err != nil {
+		return nil, err
+	}
+	return likes, nil
+}
+
+func (r *likeRepository) DeleteLikes(id uint, contentType entity.ContentType) error {
+	return r.db.Where("content_id = ? AND content_type = ?", id, contentType).Delete(&entity.Like{}).Error
 }
 
 func (r *likeRepository) Migration() error {

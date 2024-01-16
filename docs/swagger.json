@@ -4,55 +4,9 @@
         "contact": {}
     },
     "paths": {
-        "/Friendship/add": {
-            "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Friendship"
-                ],
-                "summary": "Add user as friend",
-                "responses": {
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/Friendship/delete": {
-            "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Friendship"
-                ],
-                "summary": "Delete user as friend",
-                "responses": {
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
         "/auth/login": {
             "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
+                "description": "Create token with given credentials",
                 "consumes": [
                     "application/json"
                 ],
@@ -75,8 +29,8 @@
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/auth.LoginResponse"
                         }
@@ -92,7 +46,7 @@
         },
         "/auth/logout": {
             "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
+                "description": "Delete session with given access token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -105,20 +59,18 @@
                 "summary": "Logout user",
                 "parameters": [
                     {
-                        "description": "body params",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth.LoginRequest"
-                        }
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/auth.LoginResponse"
+                            "$ref": "#/definitions/httpresponse.Response"
                         }
                     },
                     "400": {
@@ -132,7 +84,7 @@
         },
         "/comment/create": {
             "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
+                "description": "Create comment from payload with POST method; need Authorization",
                 "consumes": [
                     "application/json"
                 ],
@@ -143,7 +95,31 @@
                     "Comment"
                 ],
                 "summary": "Create comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "body params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.CreateRequest"
+                        }
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/httpmodel.CreateResponse"
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -153,9 +129,9 @@
                 }
             }
         },
-        "/comment/delete": {
-            "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
+        "/comment/delete/{comment_id}": {
+            "delete": {
+                "description": "Delete comment by comment id",
                 "consumes": [
                     "application/json"
                 ],
@@ -165,8 +141,30 @@
                 "tags": [
                     "Comment"
                 ],
-                "summary": "Create post",
+                "summary": "Delete Comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the comment to delete",
+                        "name": "comment_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/httpresponse.Response"
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -176,9 +174,9 @@
                 }
             }
         },
-        "/comment/get": {
-            "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
+        "/comment/get/{comment_id}": {
+            "get": {
+                "description": "Get comment by id. This id must be taken from path and need authorization",
                 "consumes": [
                     "application/json"
                 ],
@@ -188,8 +186,30 @@
                 "tags": [
                     "Comment"
                 ],
-                "summary": "Create post",
+                "summary": "Get Comment BY ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the comment to get comment",
+                        "name": "comment_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/entity.Comment"
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -199,9 +219,9 @@
                 }
             }
         },
-        "/comment/list": {
-            "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
+        "/comment/list/{post_id}": {
+            "get": {
+                "description": "List comments with giving post_id which is requested from params. Authenticates given user by giving an access jwttoken.",
                 "consumes": [
                     "application/json"
                 ],
@@ -211,8 +231,33 @@
                 "tags": [
                     "Comment"
                 ],
-                "summary": "Create post",
+                "summary": "List comments by post id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the post to list comments",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Comment"
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -223,8 +268,8 @@
             }
         },
         "/comment/update": {
-            "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
+            "put": {
+                "description": "Update comment from payload with PUT method; need Authorization",
                 "consumes": [
                     "application/json"
                 ],
@@ -234,8 +279,310 @@
                 "tags": [
                     "Comment"
                 ],
-                "summary": "Create post",
+                "summary": "Update Comment By ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "body params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.UpdateRequest"
+                        }
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/httpresponse.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/comment/update/{comment_id}/image": {
+            "put": {
+                "description": "Update comment image with authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the comment to update the image for",
+                        "name": "comment_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "The image file to upload",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/httpmodel.UpdateImageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/friendship/accept/{request_id}": {
+            "post": {
+                "description": "Accept user from pending friendship request, this endpoint needs authentication",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendship"
+                ],
+                "summary": "Accept user from pending friendship request",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the user to add as friendship",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/httpresponse.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/friendship/add/{user_id}": {
+            "post": {
+                "description": "Add user as a friend, this endpoint needs authentication",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendship"
+                ],
+                "summary": "Add user as friend",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the user to add as friendship",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/httpresponse.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/friendship/list/{status}": {
+            "get": {
+                "description": "List friendship by status, if status empty it will return all data. Status is enum v\nStatus is enum values and get; pending and accepted values",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendship"
+                ],
+                "summary": "List friendship",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter with status it takes enum values which are; pending, accepted and also empty string. if status is empty string all documents will return",
+                        "name": "status",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/friendship.ReadFriendship"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/friendship/reject/{request_id}": {
+            "post": {
+                "description": "Reject user from pending friendship request, this endpoint needs authentication",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendship"
+                ],
+                "summary": "Reject user from pending friendship request",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the user to add as friendship",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/httpresponse.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/friendship/remove/{request_id}": {
+            "post": {
+                "description": "Remove user from friend, this endpoint needs authentication",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendship"
+                ],
+                "summary": "Remove user from friend",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the request to be removed which is in list in friendship endpoint",
+                        "name": "request_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/httpresponse.Response"
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -265,9 +612,99 @@
                 }
             }
         },
+        "/like/comments/{comment_id}": {
+            "post": {
+                "description": "Like comment by comment id. This id must be taken from path and need authorization",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Like"
+                ],
+                "summary": "Like Comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the comment to be liked",
+                        "name": "comment_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/httpresponse.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/like/posts/{post_id}": {
+            "post": {
+                "description": "Like post by post id. This id must be taken from path and need authorization",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Like"
+                ],
+                "summary": "Like Post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the post to be liked",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/httpresponse.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/post/create": {
             "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
+                "description": "Create post from body with authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -278,7 +715,31 @@
                     "Post"
                 ],
                 "summary": "Create post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "body params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/post.CreateRequest"
+                        }
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/httpmodel.CreateResponse"
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -288,8 +749,8 @@
                 }
             }
         },
-        "/post/delete": {
-            "post": {
+        "/post/delete/{post_id}": {
+            "delete": {
                 "description": "authenticates given user by giving an access jwttoken.",
                 "consumes": [
                     "application/json"
@@ -300,8 +761,30 @@
                 "tags": [
                     "Post"
                 ],
-                "summary": "Create post",
+                "summary": "Delete post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID of the post to delete",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/httpresponse.Response"
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -311,8 +794,8 @@
                 }
             }
         },
-        "/post/get": {
-            "post": {
+        "/post/get/{post_id}": {
+            "get": {
                 "description": "authenticates given user by giving an access jwttoken.",
                 "consumes": [
                     "application/json"
@@ -323,8 +806,23 @@
                 "tags": [
                     "Post"
                 ],
-                "summary": "Create post",
+                "summary": "Get post by id post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/post.ReadPostResponse"
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -335,7 +833,7 @@
             }
         },
         "/post/list": {
-            "post": {
+            "get": {
                 "description": "authenticates given user by giving an access jwttoken.",
                 "consumes": [
                     "application/json"
@@ -346,8 +844,26 @@
                 "tags": [
                     "Post"
                 ],
-                "summary": "Create post",
+                "summary": "List post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/post.ReadPostResponse"
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -358,8 +874,8 @@
             }
         },
         "/post/update": {
-            "post": {
-                "description": "authenticates given user by giving an access jwttoken.",
+            "put": {
+                "description": "Update post from body with authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -369,8 +885,31 @@
                 "tags": [
                     "Post"
                 ],
-                "summary": "Create post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "body params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/post.UpdateRequest"
+                        }
+                    }
+                ],
                 "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/httpresponse.Response"
+                        }
+                    },
                     "400": {
                         "description": "Bad Request"
                     },
@@ -380,7 +919,103 @@
                 }
             }
         },
-        "/user/register": {
+        "/post/update/{post_id}/image": {
+            "put": {
+                "description": "Update post image with authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Post"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID of the post to update the image for",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "The image file to upload",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/httpmodel.UpdateImageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/private/update/photo": {
+            "put": {
+                "description": "Update profile pic with authentication",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update own profile pic",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Auth token of logged-in user.",
+                        "name": "X-Auth-Token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "The image file to upload",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/httpmodel.UpdateImageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/public/register": {
             "post": {
                 "description": "authenticates given user by giving an access jwttoken.",
                 "consumes": [
@@ -405,8 +1040,8 @@
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/user.RegisterResponse"
                         }
@@ -460,6 +1095,308 @@
                     "type": "string",
                     "x-order": "2",
                     "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyIjp7IklEIjozLCJVc2VybmFtZSI6Impob24iLCJFbWFpbCI6ImpvaG5AZ21haWwuY29tIiwiUGFzc3dvcmQiOiIkMmEkMTAkRkFUb1ZsS2Y2VmZIRGtYL1dLWmVRT0o2U1kuU3Z0SnNYYmhZV2FlTnBrbjU3S0hlNk4vZTIiLCJEZWZhdWx0Q3VycmVuY3lDb2RlIjoiIiwiY3JlYXRlZF9hdCI6IjIwMjItMTEtMjNUMjI6MjA6MDkuMzk0NzQ3KzAzOjAwIiwidXBkYXRlZF9hdCI6IjIwMjItMTEtMjNUMjI6MjA6MDkuMzk0NzQ3KzAzOjAwIiwiZGVsZXRlZF9hdCI6bnVsbH0sImV4cCI6MTY2OTM4OTM3MH0.b_i6GhYzqOp0VvouVi0rw2VG43UZx7lnJXqNEAKMH8o"
+                }
+            }
+        },
+        "comment.CreateRequest": {
+            "type": "object",
+            "required": [
+                "body",
+                "post_id"
+            ],
+            "properties": {
+                "post_id": {
+                    "description": "ID of the post",
+                    "type": "integer",
+                    "x-order": "1",
+                    "example": 1
+                },
+                "body": {
+                    "description": "Body of the post",
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "New Post..."
+                },
+                "parent_id": {
+                    "description": "ID of the parent comment id",
+                    "type": "integer",
+                    "x-order": "3",
+                    "example": 1
+                }
+            }
+        },
+        "comment.UpdateRequest": {
+            "type": "object",
+            "required": [
+                "body",
+                "id",
+                "post_id"
+            ],
+            "properties": {
+                "id": {
+                    "description": "ID of the comment",
+                    "type": "integer",
+                    "x-order": "1",
+                    "example": 1
+                },
+                "post_id": {
+                    "description": "ID of the post",
+                    "type": "integer",
+                    "x-order": "2",
+                    "example": 3
+                },
+                "body": {
+                    "description": "Body of the post",
+                    "type": "string",
+                    "x-order": "3",
+                    "example": "3"
+                }
+            }
+        },
+        "entity.Comment": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "parenId": {
+                    "type": "integer"
+                },
+                "post": {
+                    "$ref": "#/definitions/entity.Post"
+                },
+                "postID": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entity.User"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.Post": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/entity.User"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.User": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "profilePhoto": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "friendship.ReadFriendship": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID of the friendship request",
+                    "type": "integer"
+                },
+                "receiver": {
+                    "$ref": "#/definitions/friendship.ReadFriendshipUser"
+                },
+                "sender": {
+                    "$ref": "#/definitions/friendship.ReadFriendshipUser"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "friendship.ReadFriendshipUser": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "gorm.DeletedAt": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
+                }
+            }
+        },
+        "httpmodel.CreateResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID of the created model`",
+                    "type": "integer",
+                    "x-order": "1",
+                    "example": 1
+                }
+            }
+        },
+        "httpmodel.UpdateImageResponse": {
+            "type": "object",
+            "properties": {
+                "uploaded_file_name": {
+                    "description": "Uploaded file name",
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "https://res-cdn.com/postId"
+                }
+            }
+        },
+        "httpresponse.Response": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "x-order": "1",
+                    "example": true
+                },
+                "status_code": {
+                    "type": "integer",
+                    "x-order": "2",
+                    "example": 200
+                },
+                "error": {
+                    "x-order": "4",
+                    "$ref": "#/definitions/httpresponse.ResponseError"
+                },
+                "data": {
+                    "x-order": "5"
+                }
+            }
+        },
+        "httpresponse.ResponseError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "x-order": "1",
+                    "example": "NOT_FOUND"
+                },
+                "detail": {
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "user not found"
+                }
+            }
+        },
+        "post.CreateRequest": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                }
+            }
+        },
+        "post.ReadPostResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                }
+            }
+        },
+        "post.UpdateRequest": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
                 }
             }
         },
