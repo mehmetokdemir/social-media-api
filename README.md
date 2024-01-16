@@ -1,5 +1,5 @@
 ## Social Media API
-#Rest API for social media app. Using golang, fiber, gorm, postgresql
+Rest API for social media app. Using golang, fiber, gorm, postgresql
 
 Start golangci lint run
 ````shell
