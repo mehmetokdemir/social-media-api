@@ -7,6 +7,7 @@ type FriendshipStatusEnum string
 const (
 	FriendshipStatusPending  FriendshipStatusEnum = "pending"
 	FriendshipStatusAccepted FriendshipStatusEnum = "accepted"
+	FriendshipStatusRejected FriendshipStatusEnum = "rejected"
 )
 
 // Friendship DB Model

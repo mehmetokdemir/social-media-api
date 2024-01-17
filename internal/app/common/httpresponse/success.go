@@ -8,7 +8,6 @@ func NewSuccess(ctx *fiber.Ctx, statusCode int, data interface{}) Response {
 	res := new(Response)
 	res.Success = true
 	res.StatusCode = statusCode
-	res.Error = nil
 	res.Data = data
 	_ = ctx.JSON(res)
 

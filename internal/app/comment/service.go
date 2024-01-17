@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/mehmetokdemir/social-media-api/internal/app/cdn"
 	"github.com/mehmetokdemir/social-media-api/internal/app/entity"
+	"github.com/mehmetokdemir/social-media-api/internal/app/like"
 	"github.com/mehmetokdemir/social-media-api/internal/config"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -13,7 +14,6 @@ import (
 )
 
 type ICommentService interface {
-	//CreateComment todo: create req from request
 	CreateComment(userID uint, comment CreateRequest) (*entity.Comment, error)
 
 	UpdateComment(userID uint, req UpdateRequest) (*entity.Comment, error)
@@ -21,27 +21,30 @@ type ICommentService interface {
 
 	GetCommentById(id uint) (*entity.Comment, error)
 	DeleteCommentById(userID, id uint) error
+
 	ListCommentsByPostID(postID uint) ([]*entity.Comment, error)
 	DeleteCommentsByPostID(postID uint) error
 }
 
 type commentService struct {
-	config     config.Config
-	logger     *zap.SugaredLogger
-	repository ICommentRepository
-	cdnService cdn.ICdnService
+	config      config.Config
+	logger      *zap.SugaredLogger
+	repository  ICommentRepository
+	cdnService  cdn.ICdnService
+	likeService like.ILikeService
 }
 
-func NewCommentService(repository ICommentRepository, cdnService cdn.ICdnService, logger *zap.SugaredLogger, config config.Config) ICommentService {
+func NewCommentService(repository ICommentRepository, likeService like.ILikeService, cdnService cdn.ICdnService, logger *zap.SugaredLogger, config config.Config) ICommentService {
 	if repository == nil {
 		return nil
 	}
 
 	return &commentService{
-		config:     config,
-		repository: repository,
-		logger:     logger,
-		cdnService: cdnService,
+		config:      config,
+		repository:  repository,
+		logger:      logger,
+		cdnService:  cdnService,
+		likeService: likeService,
 	}
 }
 
@@ -49,8 +52,6 @@ func (s *commentService) CreateComment(userID uint, comment CreateRequest) (*ent
 	if ok := s.repository.IsPostExist(comment.PostId); !ok {
 		return nil, errors.New("post not found")
 	}
-
-	fmt.Println("create req", comment)
 
 	dbComment := entity.Comment{
 		UserID: userID,
@@ -121,22 +122,26 @@ func (s *commentService) GetCommentById(id uint) (*entity.Comment, error) {
 }
 
 func (s *commentService) DeleteCommentById(userID, id uint) error {
-	// TODO: NEED TRANSACTİON, delete comments with liked comments
-	comment, err := s.repository.Get(id)
+
+	commentById, err := s.repository.Get(id)
 	if err != nil {
 		return err
 	}
 
-	if userID != comment.UserID {
+	if userID != commentById.UserID {
 		return errors.New("do not have permission to delete this comment")
 	}
 
-	if comment.ParenId == nil {
-		if err = s.repository.DeleteCommentsWithSubComments(comment.ID); err != nil {
+	if err = s.likeService.DeleteLikesByCommentID(commentById.ID); err != nil {
+		return err
+	}
+
+	if commentById.ParenId == nil {
+		if err = s.repository.DeleteCommentsWithSubComments(commentById.ID); err != nil {
 			return err
 		}
 	} else {
-		if err = s.repository.Delete(comment.ID); err != nil {
+		if err = s.repository.Delete(commentById.ID); err != nil {
 			return err
 		}
 	}

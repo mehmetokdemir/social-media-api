@@ -35,6 +35,7 @@ func NewLikeService(likeRepository ILikeRepository, logger *zap.SugaredLogger, c
 }
 
 func (s *likeService) DeleteLikesByCommentID(commentID uint) error {
+
 	return s.likeRepository.DeleteLikes(commentID, entity.ContentTypeComment)
 }
 

@@ -3,6 +3,7 @@ package friendship
 import (
 	"errors"
 	"fmt"
+	"github.com/mehmetokdemir/social-media-api/internal/app/common/httpmodel"
 	"github.com/mehmetokdemir/social-media-api/internal/app/entity"
 	"github.com/mehmetokdemir/social-media-api/internal/config"
 	"go.uber.org/zap"
@@ -42,6 +43,10 @@ func (s *friendshipService) GetFriendShipByRequestID(requestID uint) (*entity.Fr
 
 func (s *friendshipService) AddFriend(senderID, receiverID uint) error {
 
+	if senderID == receiverID {
+		return errors.New("can not send yourself a friend request")
+	}
+
 	if !s.friendshipRepository.IsUserExist(senderID) || !s.friendshipRepository.IsUserExist(receiverID) {
 		return errors.New("can not find users")
 	}
@@ -77,12 +82,12 @@ func (s *friendshipService) RemoveFriend(userID, friendshipRequestID uint) error
 		return err
 	}
 
-	if friendShip.SenderID != userID || friendShip.ReceiverID != userID {
-		return errors.New("do not have permission to remove this friend")
-	}
-
 	if friendShip.Status != entity.FriendshipStatusAccepted {
 		return errors.New("can not delete friendship, because of you are not friends")
+	}
+
+	if friendShip.SenderID != userID || friendShip.ReceiverID != userID {
+		return errors.New("do not have permission to remove this friend")
 	}
 
 	return s.friendshipRepository.DeleteFriendRequest(friendShip.ID)
@@ -94,15 +99,15 @@ func (s *friendshipService) RejectFriend(userID, friendshipRequestID uint) error
 		return err
 	}
 
-	if friendShip.SenderID != userID || friendShip.ReceiverID != userID {
-		return errors.New("do not have permission to remove this friend")
-	}
-
 	if friendShip.Status != entity.FriendshipStatusPending {
 		return errors.New("can not reject friendship, if u want to reject first accept to friendship")
 	}
 
-	return s.friendshipRepository.DeleteFriendRequest(friendShip.ID)
+	if friendShip.ReceiverID != userID {
+		return errors.New("do not have permission to reject this friend")
+	}
+
+	return s.friendshipRepository.RejectFriendRequest(friendShip.ID)
 }
 
 func (s *friendshipService) ListFriends(userID uint, status *entity.FriendshipStatusEnum) ([]ReadFriendship, error) {
@@ -113,26 +118,16 @@ func (s *friendshipService) ListFriends(userID uint, status *entity.FriendshipSt
 
 	var readFriendships []ReadFriendship
 	for _, fs := range friendShips {
-		sender, err := s.friendshipRepository.GetUserByID(fs.SenderID)
-		if err != nil {
-			return nil, err
-		}
-
-		receiver, err := s.friendshipRepository.GetUserByID(fs.ReceiverID)
-		if err != nil {
-			return nil, err
-		}
 		readFriendships = append(readFriendships, ReadFriendship{
 			Id:        fs.ID,
 			CreatedAt: fs.Model.CreatedAt.Format(time.RFC3339),
-			Sender:    ReadFriendshipUser{Id: fs.SenderID, Username: sender.Username},
-			Receiver:  ReadFriendshipUser{Id: fs.ReceiverID, Username: receiver.Username},
+			Sender:    httpmodel.CommonUser{Id: fs.SenderID, Username: fs.Sender.Username, FirstName: fs.Sender.FirstName, LastName: fs.Sender.LastName, ProfilePhoto: fs.Sender.ProfilePhoto},
+			Receiver:  httpmodel.CommonUser{Id: fs.ReceiverID, Username: fs.Receiver.Username, FirstName: fs.Receiver.FirstName, LastName: fs.Receiver.LastName, ProfilePhoto: fs.Receiver.ProfilePhoto},
 			Status:    fs.Status,
 		})
 	}
 
 	return readFriendships, nil
-
 }
 
 func (s *friendshipService) AcceptFriend(userID uint, friendshipRequestID uint) error {
@@ -141,12 +136,12 @@ func (s *friendshipService) AcceptFriend(userID uint, friendshipRequestID uint) 
 		return err
 	}
 
-	if friendship.SenderID != userID {
-		return errors.New("can not accept to friendship")
-	}
-
 	if friendship.Status != entity.FriendshipStatusPending {
 		return errors.New("can not accept to friendship, friendship status is not pending")
+	}
+
+	if friendship.ReceiverID != userID {
+		return errors.New("can not accept to friendship")
 	}
 
 	return s.friendshipRepository.AcceptFriendRequest(friendshipRequestID)

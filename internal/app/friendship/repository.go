@@ -1,7 +1,6 @@
 package friendship
 
 import (
-	"errors"
 	"github.com/mehmetokdemir/social-media-api/internal/app/entity"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -10,8 +9,9 @@ import (
 type IFriendshipRepository interface {
 	CreateFriendRequest(friendship entity.Friendship) (*entity.Friendship, error)
 	AcceptFriendRequest(requestID uint) error
+	RejectFriendRequest(requestID uint) error
 	DeleteFriendRequest(requestID uint) error
-	ListFriendRequests(userID uint, status *entity.FriendshipStatusEnum) ([]*entity.Friendship, error)
+	ListFriendRequests(userID uint, status *entity.FriendshipStatusEnum) ([]entity.Friendship, error)
 	IsFriendShip(senderID, receiverID uint) (bool, error)
 	IsFriendShipPending(senderID, receiverID uint) (bool, error)
 	IsUserExist(userID uint) bool
@@ -43,6 +43,10 @@ func (r *friendshipRepository) AcceptFriendRequest(requestID uint) error {
 	return r.db.Model(&entity.Friendship{}).Where("id =?", requestID).Update("status", entity.FriendshipStatusAccepted).Error
 }
 
+func (r *friendshipRepository) RejectFriendRequest(requestID uint) error {
+	return r.db.Model(&entity.Friendship{}).Where("id =?", requestID).Update("status", entity.FriendshipStatusRejected).Error
+}
+
 func (r *friendshipRepository) GetUserByID(id uint) (user *entity.User, err error) {
 	if err = r.db.Model(&entity.User{}).Where("id =?", id).First(&user).Error; err != nil {
 		return nil, err
@@ -51,35 +55,26 @@ func (r *friendshipRepository) GetUserByID(id uint) (user *entity.User, err erro
 }
 
 func (r *friendshipRepository) IsFriendShip(senderID, receiverID uint) (bool, error) {
-	var friendship entity.Friendship
+	var count int64
 	err := r.db.Model(&entity.Friendship{}).
 		Where("(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)",
 			senderID, receiverID, receiverID, senderID).
-		Where("status = ?", entity.FriendshipStatusAccepted).
-		First(&friendship).Error
-	if err == nil {
-		return true, nil
+		Where("status = ?", entity.FriendshipStatusAccepted).Count(&count).Error
+	if err != nil {
+		return false, err
 	}
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return false, nil
-	}
-	return false, err
+	return count > 0, nil
 }
 
 func (r *friendshipRepository) IsFriendShipPending(senderID, receiverID uint) (bool, error) {
-	var friendship entity.Friendship
-	err := r.db.Model(&entity.Friendship{}).
+	var count int64
+	if err := r.db.Model(&entity.Friendship{}).
 		Where("(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)",
 			senderID, receiverID, receiverID, senderID).
-		Where("status = ?", entity.FriendshipStatusPending).
-		First(&friendship).Error
-	if err == nil {
-		return true, nil
+		Where("status = ?", entity.FriendshipStatusPending).Count(&count).Error; err != nil {
+		return false, err
 	}
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return false, nil
-	}
-	return false, err
+	return count > 0, nil
 }
 
 func (r *friendshipRepository) GetFriends(userID uint, status *entity.FriendshipStatusEnum) ([]entity.Friendship, error) {
@@ -97,7 +92,7 @@ func (r *friendshipRepository) GetFriends(userID uint, status *entity.Friendship
 }
 
 func (r *friendshipRepository) GetFriendshipRequest(senderID, receiverID uint) (Friendship *entity.Friendship, err error) {
-	if err = r.db.Model(&entity.Friendship{}).Preload("User").
+	if err = r.db.Preload("User").Model(&entity.Friendship{}).
 		Where("(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)",
 			senderID, receiverID, receiverID, senderID).First(&Friendship).Error; err != nil {
 		return nil, err
@@ -125,24 +120,23 @@ func (r *friendshipRepository) GetFriendRequest(requestID uint) (friendship *ent
 	return friendship, nil
 }
 
-func (r *friendshipRepository) ListFriendRequests(userID uint, status *entity.FriendshipStatusEnum) ([]*entity.Friendship, error) {
-	friendships := make([]*entity.Friendship, 0)
+func (r *friendshipRepository) ListFriendRequests(userID uint, status *entity.FriendshipStatusEnum) ([]entity.Friendship, error) {
+	var friendships []entity.Friendship
 	if status == nil {
-		err := r.db.Model(&entity.Friendship{}).
+		err := r.db.Preload("Sender").Preload("Receiver").Model(&entity.Friendship{}).
 			Where("sender_id = ? OR receiver_id = ?", userID, userID).
+			Where("status <> ?", entity.FriendshipStatusRejected).
 			Order("created_at DESC").
-			Select("id, sender_id, receiver_id, status").
-			Scan(&friendships).Error
+			Find(&friendships).Error
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		err := r.db.Model(&entity.Friendship{}).
+		err := r.db.Preload("Sender").Preload("Receiver").Model(&entity.Friendship{}).
 			Where("sender_id = ? OR receiver_id = ?", userID, userID).
 			Where("status = ?", *status).
 			Order("created_at DESC").
-			Select("id, sender_id, receiver_id, status").
-			Scan(&friendships).Error
+			Find(&friendships).Error
 		if err != nil {
 			return nil, err
 		}

@@ -5,12 +5,11 @@ import (
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+
 	_ "github.com/mehmetokdemir/social-media-api/docs"
 	"github.com/mehmetokdemir/social-media-api/internal/config"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -28,9 +27,8 @@ type Server struct {
 
 func New(handlers []Handler, config config.Config, logger *zap.SugaredLogger) *Server {
 	app := fiber.New()
-	// app.Use(middleware.PrometheusMiddleware(requestsTotal, cpuUsage))
+	app.Use(cors.New())
 
-	app.Use(cors.New(cors.ConfigDefault))
 	for _, handler := range handlers {
 		handler.RegisterRoutes(app)
 	}
@@ -46,6 +44,12 @@ func New(handlers []Handler, config config.Config, logger *zap.SugaredLogger) *S
 func (s *Server) AddRoutes() {
 	s.app.Get("/health", s.healthCheck)
 	s.app.Get("/swagger/*", swagger.HandlerDefault)
+	s.app.Get("/metrics", s.metrics)
+}
+
+func (s *Server) metrics(ctx *fiber.Ctx) error {
+	//promhttp.HandlerFor(promRegistry, promhttp.HandlerOpts{}).ServeHTTP(c.Response().Writer, c.Request())
+	return nil
 }
 
 // HealthCheck godoc
@@ -75,6 +79,7 @@ func (s *Server) healthCheck(ctx *fiber.Ctx) error {
 // @BasePath /
 // @schemes http
 func (s *Server) Start() error {
+	promRegistry := prometheus.NewRegistry()
 	// Register the metrics.
 	requestsTotal := prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "requests_total",
@@ -92,11 +97,8 @@ func (s *Server) Start() error {
 		Name: "request_sizes",
 		Help: "The sizes of requests.",
 	})
-	prometheus.MustRegister(requestsTotal, cpuUsage, responseTimes, requestSizes)
-	httpHandler := promhttp.Handler()
 
-	// Handle the metrics endpoint.
-	http.Handle("/metrics", httpHandler)
+	promRegistry.MustRegister(requestsTotal, cpuUsage, responseTimes, requestSizes)
 
 	address := fmt.Sprintf(":%s", s.config.ServerPort)
 	shutDownChan := make(chan os.Signal, 1)

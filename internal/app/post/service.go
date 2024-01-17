@@ -3,9 +3,9 @@ package post
 import (
 	"errors"
 	"fmt"
-	"github.com/gofiber/fiber/v2/log"
 	"github.com/mehmetokdemir/social-media-api/internal/app/cdn"
 	"github.com/mehmetokdemir/social-media-api/internal/app/comment"
+	"github.com/mehmetokdemir/social-media-api/internal/app/common/httpmodel"
 	"github.com/mehmetokdemir/social-media-api/internal/app/entity"
 	"github.com/mehmetokdemir/social-media-api/internal/app/like"
 	"github.com/mehmetokdemir/social-media-api/internal/app/transaction"
@@ -117,37 +117,19 @@ func (s *postService) GetPostById(id uint) (*ReadPostResponse, error) {
 }
 
 func (s *postService) DeletePostById(userID uint, id uint) error {
-	if err := s.transactionService.Begin(); err != nil {
-		return err
-	}
-
-	var rollbackErr error
-	defer func() {
-		if rollbackErr != nil {
-			fmt.Println("Rollback due to error:", rollbackErr.Error())
-			if err := s.transactionService.Rollback(); err != nil {
-				log.Fatalf("can not rollback transaction :%v", err.Error())
-			}
-		}
-	}()
-
+	// TODO : Need transaction commit with rollback
 	postByID, err := s.repository.Get(id)
 	if err != nil {
-		fmt.Println("girdi 1", err.Error())
-		rollbackErr = err
 		return err
 	}
 
 	if postByID.UserID != userID {
-		fmt.Println("girdi 2", err.Error())
-		rollbackErr = errors.New("do not have permission to update this post")
 		return errors.New("do not have permission to update this post")
 	}
 
 	// Get comments which is belongs to post
 	comments, err := s.commentService.ListCommentsByPostID(id)
 	if err != nil {
-		rollbackErr = err
 		return err
 	}
 
@@ -157,7 +139,6 @@ func (s *postService) DeletePostById(userID uint, id uint) error {
 			for _, l := range likes {
 				if err = s.likeService.DeleteLikesByCommentID(l.ContentID); err != nil {
 					fmt.Println("girdi 3", err.Error())
-					rollbackErr = err
 					return err
 				}
 			}
@@ -165,26 +146,18 @@ func (s *postService) DeletePostById(userID uint, id uint) error {
 	}
 
 	if err = s.commentService.DeleteCommentsByPostID(id); err != nil {
-		fmt.Println("girdi 4", err.Error())
-		rollbackErr = err
 		return err
 	}
 
 	if err = s.likeService.DeleteLikesByPostID(id); err != nil {
-		fmt.Println("girdi 5", err.Error())
-		rollbackErr = err
 		return err
 	}
 
 	if err = s.repository.Delete(id); err != nil {
-		fmt.Println("girdi 6", err.Error())
-		rollbackErr = err
 		return err
 	}
 
 	if err = s.transactionService.Commit(); err != nil {
-		fmt.Println("girdi 7", err.Error())
-		rollbackErr = err
 		return err
 	}
 
@@ -192,7 +165,6 @@ func (s *postService) DeletePostById(userID uint, id uint) error {
 }
 
 func (s *postService) ListPosts() ([]ReadPostResponse, error) {
-	// TODO: Divide arkadas post, kendi post veya tüm postları
 	posts, err := s.repository.List()
 	if err != nil {
 		return nil, err
@@ -205,6 +177,7 @@ func (s *postService) ListPosts() ([]ReadPostResponse, error) {
 			CreatedAt: post.CreatedAt.Format(time.RFC3339),
 			Body:      post.Body,
 			Image:     post.Image,
+			User:      httpmodel.CommonUser{Id: post.UserID, Username: post.User.Username, ProfilePhoto: post.User.ProfilePhoto},
 		})
 	}
 

@@ -26,9 +26,9 @@ func NewHttpHandler(guardService guard.IGuardService, friendshipService IFriends
 func (h *HttpHandler) RegisterRoutes(app *fiber.App) {
 	appGroup := app.Group("/friendship").Use(middleware.AuthMiddleware(h.jwtPrivateKey))
 	appGroup.Post("/add/:user_id", h.Add)
-	appGroup.Post("/remove/:user_id", h.Remove)
-	appGroup.Post("/reject/:user_id", h.Reject)
-	appGroup.Post("/accept/:user_id", h.Accept)
+	appGroup.Post("/remove/:request_id", h.Remove)
+	appGroup.Post("/reject/:request_id", h.Reject)
+	appGroup.Post("/accept/:request_id", h.Accept)
 	appGroup.Get("/list/:status", h.List)
 }
 
@@ -78,7 +78,7 @@ func (h *HttpHandler) Add(ctx *fiber.Ctx) error {
 // @Accept  json
 // @Produce  json
 // @Param X-Auth-Token header string true "Auth token of logged-in user."
-// @Param user_id path integer true "ID of the user to add as friendship"
+// @Param request_id path integer true "ID of the user to add as friendship"
 // @Success 200 {object} httpresponse.Response "Success"
 // @Failure 400
 // @Failure 500
@@ -118,7 +118,7 @@ func (h *HttpHandler) Reject(ctx *fiber.Ctx) error {
 // @Accept  json
 // @Produce  json
 // @Param X-Auth-Token header string true "Auth token of logged-in user."
-// @Param user_id path integer true "ID of the user to add as friendship"
+// @Param request_id path integer true "ID of the user to add as friendship"
 // @Success 200 {object} httpresponse.Response "Success"
 // @Failure 400
 // @Failure 500

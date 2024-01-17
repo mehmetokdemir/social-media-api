@@ -58,7 +58,7 @@ func (r *postRepository) Get(id uint) (post *entity.Post, err error) {
 
 func (r *postRepository) List() ([]entity.Post, error) {
 	var posts []entity.Post
-	if err := r.db.Model(&entity.Post{}).Order("created_at DESC").Find(&posts).Error; err != nil {
+	if err := r.db.Preload("User").Model(&entity.Post{}).Order("created_at DESC").Find(&posts).Error; err != nil {
 		return nil, err
 	}
 

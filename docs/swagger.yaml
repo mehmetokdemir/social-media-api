@@ -150,17 +150,10 @@ definitions:
         description: ID of the friendship request
         type: integer
       receiver:
-        $ref: '#/definitions/friendship.ReadFriendshipUser'
+        $ref: '#/definitions/httpmodel.CommonUser'
       sender:
-        $ref: '#/definitions/friendship.ReadFriendshipUser'
+        $ref: '#/definitions/httpmodel.CommonUser'
       status:
-        type: string
-    type: object
-  friendship.ReadFriendshipUser:
-    properties:
-      id:
-        type: integer
-      username:
         type: string
     type: object
   gorm.DeletedAt:
@@ -170,6 +163,19 @@ definitions:
       valid:
         description: Valid is true if Time is not NULL
         type: boolean
+    type: object
+  httpmodel.CommonUser:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      profile_photo:
+        type: string
+      username:
+        type: string
     type: object
   httpmodel.CreateResponse:
     properties:
@@ -229,6 +235,8 @@ definitions:
         type: integer
       image:
         type: string
+      user:
+        $ref: '#/definitions/httpmodel.CommonUser'
     type: object
   post.UpdateRequest:
     properties:
@@ -522,7 +530,7 @@ paths:
         type: string
       - description: ID of the user to add as friendship
         in: path
-        name: user_id
+        name: request_id
         required: true
         type: integer
       produces:
@@ -617,7 +625,7 @@ paths:
         type: string
       - description: ID of the user to add as friendship
         in: path
-        name: user_id
+        name: request_id
         required: true
         type: integer
       produces:

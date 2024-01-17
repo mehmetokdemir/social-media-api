@@ -48,6 +48,7 @@ services:
     networks:
       - social-media-network
 
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -69,7 +70,6 @@ services:
     restart: always
     networks:
       - social-media-network
-
 
 networks:
   social-media-network:

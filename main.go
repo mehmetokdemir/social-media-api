@@ -72,13 +72,6 @@ func run() error {
 	friendshipService := friendship.NewFriendshipService(friendshipRepository, zapLogger, appConfig)
 	friendshipHandler := friendship.NewHttpHandler(guardService, friendshipService, zapLogger, appConfig.JwtATPrivateKey)
 
-	commentRepository := comment.NewRepository(db, zapLogger)
-	if err = commentRepository.Migration(); err != nil {
-		return nil
-	}
-	commentService := comment.NewCommentService(commentRepository, cdnService, zapLogger, appConfig)
-	commentHandler := comment.NewHttpHandler(guardService, commentService, zapLogger, appConfig.JwtATPrivateKey)
-
 	likeRepository := like.NewRepository(db, zapLogger)
 	if err = likeRepository.Migration(); err != nil {
 		return nil
@@ -87,6 +80,13 @@ func run() error {
 	likeHandler := like.NewHttpHandler(guardService, likeService, zapLogger, appConfig.JwtATPrivateKey)
 
 	transactionService := transaction.NewTransactionService(db)
+	commentRepository := comment.NewRepository(db, zapLogger)
+	if err = commentRepository.Migration(); err != nil {
+		return nil
+	}
+	commentService := comment.NewCommentService(commentRepository, likeService, cdnService, zapLogger, appConfig)
+	commentHandler := comment.NewHttpHandler(guardService, commentService, zapLogger, appConfig.JwtATPrivateKey)
+
 	postRepository := post.NewRepository(db, zapLogger)
 	if err = postRepository.Migration(); err != nil {
 		return nil
