@@ -9,6 +9,11 @@ import (
 
 func AuthMiddleware(jwtPrivateKey string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+
+		if c.Path() == "/auth/login" {
+			return c.Next()
+		}
+
 		tokenString := c.Get("X-Auth-Token")
 		if tokenString == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{

@@ -43,12 +43,10 @@ func (r *postRepository) Update(post entity.Post) (*entity.Post, error) {
 }
 
 func (r *postRepository) Delete(id uint) error {
-	fmt.Println("delete DeleteRepoPost")
 	return r.db.Where("id = ?", id).Delete(&entity.Post{}).Error
 }
 
 func (r *postRepository) Get(id uint) (post *entity.Post, err error) {
-	fmt.Println("get get endpoint")
 	if err = r.db.Model(&entity.Post{}).Where("id =?", id).First(&post).Error; err != nil {
 		fmt.Println("get get endpoint err", err.Error())
 		return nil, err

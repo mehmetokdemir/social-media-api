@@ -2,7 +2,6 @@ package post
 
 import (
 	"errors"
-	"fmt"
 	"github.com/mehmetokdemir/social-media-api/internal/app/cdn"
 	"github.com/mehmetokdemir/social-media-api/internal/app/comment"
 	"github.com/mehmetokdemir/social-media-api/internal/app/common/httpmodel"
@@ -127,37 +126,30 @@ func (s *postService) DeletePostById(userID uint, id uint) error {
 		return errors.New("do not have permission to update this post")
 	}
 
-	// Get comments which is belongs to post
-	comments, err := s.commentService.ListCommentsByPostID(id)
+	comments, err := s.commentService.ListCommentsByPostID(postByID.ID)
 	if err != nil {
 		return err
 	}
 
 	for _, com := range comments {
-		likes, err := s.likeService.GetCommentsLikeByID(com.ID)
-		if err == nil && len(likes) > 0 {
-			for _, l := range likes {
-				if err = s.likeService.DeleteLikesByCommentID(l.ContentID); err != nil {
-					fmt.Println("girdi 3", err.Error())
-					return err
-				}
-			}
+		// Delete comments likes which are belongs to post
+		if err = s.likeService.DeleteLikesByCommentID(com.ID); err != nil {
+			return err
 		}
 	}
 
-	if err = s.commentService.DeleteCommentsByPostID(id); err != nil {
+	// Delete post likes by post id
+	if err = s.likeService.DeleteLikesByPostID(postByID.ID); err != nil {
 		return err
 	}
 
-	if err = s.likeService.DeleteLikesByPostID(id); err != nil {
+	// Delete comments by post id
+	if err = s.commentService.DeleteCommentsByPostID(postByID.ID); err != nil {
 		return err
 	}
 
-	if err = s.repository.Delete(id); err != nil {
-		return err
-	}
-
-	if err = s.transactionService.Commit(); err != nil {
+	// Delete post by id
+	if err = s.repository.Delete(postByID.ID); err != nil {
 		return err
 	}
 
@@ -172,12 +164,48 @@ func (s *postService) ListPosts() ([]ReadPostResponse, error) {
 
 	var rsp []ReadPostResponse
 	for _, post := range posts {
+		var rspComments []ReadPostResponseComment
+		// Get main comments without belongs to other comments
+		comments, err := s.commentService.ListMainCommentsByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, com := range comments {
+			var rspSubComments []ReadPostResponseComment
+			subComments, err := s.commentService.ListCommentsByParentID(com.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, subComment := range subComments {
+				rspSubComments = append(rspSubComments, ReadPostResponseComment{
+					Id:         subComment.ID,
+					Body:       subComment.Body,
+					Image:      subComment.Image,
+					User:       httpmodel.CommonUser{Id: subComment.UserID, Username: subComment.User.Username, FirstName: subComment.User.FirstName, LastName: subComment.User.LastName, ProfilePhoto: subComment.User.ProfilePhoto},
+					LikedCount: s.likeService.GetCommentCountLikeByID(subComment.ID),
+				})
+			}
+
+			rspComments = append(rspComments, ReadPostResponseComment{
+				Id:          com.ID,
+				Body:        com.Body,
+				Image:       com.Image,
+				User:        httpmodel.CommonUser{Id: com.UserID, Username: com.User.Username, FirstName: com.User.FirstName, LastName: com.User.LastName, ProfilePhoto: com.User.ProfilePhoto},
+				LikedCount:  s.likeService.GetCommentCountLikeByID(com.ID),
+				SubComments: rspSubComments,
+			})
+		}
+
 		rsp = append(rsp, ReadPostResponse{
-			Id:        post.ID,
-			CreatedAt: post.CreatedAt.Format(time.RFC3339),
-			Body:      post.Body,
-			Image:     post.Image,
-			User:      httpmodel.CommonUser{Id: post.UserID, Username: post.User.Username, ProfilePhoto: post.User.ProfilePhoto},
+			Id:         post.ID,
+			CreatedAt:  post.CreatedAt.Format(time.RFC3339),
+			User:       httpmodel.CommonUser{Id: post.UserID, Username: post.User.Username, FirstName: post.User.FirstName, LastName: post.User.LastName, ProfilePhoto: post.User.ProfilePhoto},
+			Body:       post.Body,
+			Image:      post.Image,
+			LikedCount: s.likeService.GetPostCountLikeByID(post.ID),
+			Comments:   rspComments,
 		})
 	}
 

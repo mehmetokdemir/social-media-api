@@ -229,12 +229,35 @@ definitions:
     properties:
       body:
         type: string
+      comments:
+        items:
+          $ref: '#/definitions/post.ReadPostResponseComment'
+        type: array
       created_at:
         type: string
       id:
         type: integer
       image:
         type: string
+      liked_count:
+        type: integer
+      user:
+        $ref: '#/definitions/httpmodel.CommonUser'
+    type: object
+  post.ReadPostResponseComment:
+    properties:
+      body:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      liked_count:
+        type: integer
+      sub_comments:
+        items:
+          $ref: '#/definitions/post.ReadPostResponseComment'
+        type: array
       user:
         $ref: '#/definitions/httpmodel.CommonUser'
     type: object

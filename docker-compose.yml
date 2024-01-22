@@ -48,7 +48,6 @@ services:
     networks:
       - social-media-network
 
-
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -62,7 +61,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ./prometheus:/etc/prometheus
+      - ./prometheus:/etc/.prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:

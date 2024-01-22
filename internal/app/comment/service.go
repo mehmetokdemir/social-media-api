@@ -2,7 +2,6 @@ package comment
 
 import (
 	"errors"
-	"fmt"
 	"github.com/mehmetokdemir/social-media-api/internal/app/cdn"
 	"github.com/mehmetokdemir/social-media-api/internal/app/entity"
 	"github.com/mehmetokdemir/social-media-api/internal/app/like"
@@ -22,7 +21,9 @@ type ICommentService interface {
 	GetCommentById(id uint) (*entity.Comment, error)
 	DeleteCommentById(userID, id uint) error
 
-	ListCommentsByPostID(postID uint) ([]*entity.Comment, error)
+	ListCommentsByPostID(postID uint) ([]entity.Comment, error)
+	ListMainCommentsByPostID(postID uint) ([]entity.Comment, error)
+	ListCommentsByParentID(parentCommentID uint) ([]entity.Comment, error)
 	DeleteCommentsByPostID(postID uint) error
 }
 
@@ -60,7 +61,6 @@ func (s *commentService) CreateComment(userID uint, comment CreateRequest) (*ent
 	}
 
 	if comment.ParentID != nil {
-		fmt.Println("girdi", *comment.ParentID)
 		if _, err := s.repository.Get(*comment.ParentID); err != nil {
 			return nil, errors.New("parent comment not found")
 		}
@@ -132,18 +132,32 @@ func (s *commentService) DeleteCommentById(userID, id uint) error {
 		return errors.New("do not have permission to delete this comment")
 	}
 
+	// List sub comments by comment id
+	subComments, err := s.repository.ListCommentsByParentID(commentById.ID)
+	if err != nil {
+		return err
+	}
+
+	for _, subComment := range subComments {
+		// Delete sub comment likes by comment id
+		if err = s.likeService.DeleteLikesByCommentID(subComment.ID); err != nil {
+			return err
+		}
+	}
+
+	// Delete comment like if exist
 	if err = s.likeService.DeleteLikesByCommentID(commentById.ID); err != nil {
 		return err
 	}
 
-	if commentById.ParenId == nil {
-		if err = s.repository.DeleteCommentsWithSubComments(commentById.ID); err != nil {
-			return err
-		}
-	} else {
-		if err = s.repository.Delete(commentById.ID); err != nil {
-			return err
-		}
+	// Delete sub comments if exist
+	if err = s.repository.DeleteCommentsByParentID(commentById.ID); err != nil {
+		return err
+	}
+
+	// Delete main comment
+	if err = s.repository.Delete(commentById.ID); err != nil {
+		return err
 	}
 
 	return nil
@@ -161,6 +175,14 @@ func (s *commentService) DeleteCommentsByPostID(postID uint) error {
 	return nil
 }
 
-func (s *commentService) ListCommentsByPostID(postID uint) ([]*entity.Comment, error) {
+func (s *commentService) ListCommentsByParentID(parentCommentID uint) ([]entity.Comment, error) {
+	return s.repository.ListCommentsByParentID(parentCommentID)
+}
+
+func (s *commentService) ListCommentsByPostID(postID uint) ([]entity.Comment, error) {
 	return s.repository.ListCommentsByPostID(postID)
+}
+
+func (s *commentService) ListMainCommentsByPostID(postID uint) ([]entity.Comment, error) {
+	return s.repository.ListMainCommentsByPostID(postID)
 }

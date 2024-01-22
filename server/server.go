@@ -2,10 +2,10 @@ package server
 
 import (
 	"fmt"
+	"github.com/ansrivas/fiberprometheus/v2"
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-
 	_ "github.com/mehmetokdemir/social-media-api/docs"
 	"github.com/mehmetokdemir/social-media-api/internal/config"
 	"github.com/prometheus/client_golang/prometheus"
@@ -44,12 +44,6 @@ func New(handlers []Handler, config config.Config, logger *zap.SugaredLogger) *S
 func (s *Server) AddRoutes() {
 	s.app.Get("/health", s.healthCheck)
 	s.app.Get("/swagger/*", swagger.HandlerDefault)
-	s.app.Get("/metrics", s.metrics)
-}
-
-func (s *Server) metrics(ctx *fiber.Ctx) error {
-	//promhttp.HandlerFor(promRegistry, promhttp.HandlerOpts{}).ServeHTTP(c.Response().Writer, c.Request())
-	return nil
 }
 
 // HealthCheck godoc
@@ -67,15 +61,6 @@ func (s *Server) healthCheck(ctx *fiber.Ctx) error {
 // @title Social Media API
 // @version 2.0
 // @description This is a social media api
-// @termsOfService http://swagger.io/terms/
-
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
 // @BasePath /
 // @schemes http
 func (s *Server) Start() error {
@@ -97,8 +82,11 @@ func (s *Server) Start() error {
 		Name: "request_sizes",
 		Help: "The sizes of requests.",
 	})
-
 	promRegistry.MustRegister(requestsTotal, cpuUsage, responseTimes, requestSizes)
+
+	fiberPrometheus := fiberprometheus.New("social-media-api")
+	fiberPrometheus.RegisterAt(s.app, "/metrics")
+	s.app.Use(fiberPrometheus.Middleware)
 
 	address := fmt.Sprintf(":%s", s.config.ServerPort)
 	shutDownChan := make(chan os.Signal, 1)

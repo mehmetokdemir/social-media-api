@@ -1086,15 +1086,15 @@
                     "x-order": "1",
                     "example": "john"
                 },
-                "token_hash": {
-                    "type": "string",
-                    "x-order": "2",
-                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyIjp7IklEIjozLCJVc2VybmFtZSI6Impob24iLCJFbWFpbCI6ImpvaG5AZ21haWwuY29tIiwiUGFzc3dvcmQiOiIkMmEkMTAkRkFUb1ZsS2Y2VmZIRGtYL1dLWmVRT0o2U1kuU3Z0SnNYYmhZV2FlTnBrbjU3S0hlNk4vZTIiLCJEZWZhdWx0Q3VycmVuY3lDb2RlIjoiIiwiY3JlYXRlZF9hdCI6IjIwMjItMTEtMjNUMjI6MjA6MDkuMzk0NzQ3KzAzOjAwIiwidXBkYXRlZF9hdCI6IjIwMjItMTEtMjNUMjI6MjA6MDkuMzk0NzQ3KzAzOjAwIiwiZGVsZXRlZF9hdCI6bnVsbH0sImV4cCI6MTY2OTM4OTM3MH0.b_i6GhYzqOp0VvouVi0rw2VG43UZx7lnJXqNEAKMH8o"
-                },
                 "email": {
                     "type": "string",
                     "x-order": "2",
                     "example": "john@gmail.com"
+                },
+                "token_hash": {
+                    "type": "string",
+                    "x-order": "2",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyIjp7IklEIjozLCJVc2VybmFtZSI6Impob24iLCJFbWFpbCI6ImpvaG5AZ21haWwuY29tIiwiUGFzc3dvcmQiOiIkMmEkMTAkRkFUb1ZsS2Y2VmZIRGtYL1dLWmVRT0o2U1kuU3Z0SnNYYmhZV2FlTnBrbjU3S0hlNk4vZTIiLCJEZWZhdWx0Q3VycmVuY3lDb2RlIjoiIiwiY3JlYXRlZF9hdCI6IjIwMjItMTEtMjNUMjI6MjA6MDkuMzk0NzQ3KzAzOjAwIiwidXBkYXRlZF9hdCI6IjIwMjItMTEtMjNUMjI6MjA6MDkuMzk0NzQ3KzAzOjAwIiwiZGVsZXRlZF9hdCI6bnVsbH0sImV4cCI6MTY2OTM4OTM3MH0.b_i6GhYzqOp0VvouVi0rw2VG43UZx7lnJXqNEAKMH8o"
                 }
             }
         },
@@ -1384,6 +1384,12 @@
                 "body": {
                     "type": "string"
                 },
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/post.ReadPostResponseComment"
+                    }
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -1392,6 +1398,35 @@
                 },
                 "image": {
                     "type": "string"
+                },
+                "liked_count": {
+                    "type": "integer"
+                },
+                "user": {
+                    "$ref": "#/definitions/httpmodel.CommonUser"
+                }
+            }
+        },
+        "post.ReadPostResponseComment": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "liked_count": {
+                    "type": "integer"
+                },
+                "sub_comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/post.ReadPostResponseComment"
+                    }
                 },
                 "user": {
                     "$ref": "#/definitions/httpmodel.CommonUser"

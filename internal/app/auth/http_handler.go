@@ -21,10 +21,9 @@ func NewHttpHandler(guardService guard.IGuardService, authService IAuthService, 
 }
 
 func (h *HttpHandler) RegisterRoutes(app *fiber.App) {
-	appGroup := app.Group("/auth")
-	// Use(middleware.AuthMiddleware(h.jwtPrivateKey))
+	appGroup := app.Group("/auth").Use(middleware.AuthMiddleware(h.jwtPrivateKey))
 	appGroup.Post("/login", h.Login)
-	appGroup.Post("/logout", h.Logout).Use(middleware.AuthMiddleware(h.jwtPrivateKey))
+	appGroup.Post("/logout", h.Logout)
 }
 
 // Login godoc

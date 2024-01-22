@@ -3,6 +3,7 @@ module github.com/mehmetokdemir/social-media-api
 go 1.20
 
 require (
+	github.com/ansrivas/fiberprometheus/v2 v2.6.1
 	github.com/arsmn/fiber-swagger/v2 v2.31.1
 	github.com/cloudinary/cloudinary-go v1.7.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -10,6 +11,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/prometheus/client_golang v1.18.0
 	github.com/swaggo/swag v1.8.7
+	github.com/valyala/fasthttp v1.51.0
 	go.uber.org/zap v1.23.0
 	golang.org/x/crypto v0.16.0
 	gorm.io/driver/postgres v1.5.4
@@ -27,6 +29,7 @@ require (
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/spec v0.20.7 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
+	github.com/gofiber/adaptor/v2 v2.2.1 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -46,11 +49,10 @@ require (
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/rivo/uniseg v0.4.2 // indirect
+	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect

@@ -17,6 +17,9 @@ type ILikeRepository interface {
 
 	GetLikesByID(contentID uint, contentType entity.ContentType) ([]*entity.Like, error)
 	DeleteLikes(id uint, contentType entity.ContentType) error
+	GetCountOfLikes(id uint, contentType entity.ContentType) int64
+
+	ListCommentLikesByParentID(parentID uint) ([]*entity.Like, error)
 	Migration() error
 }
 
@@ -94,7 +97,31 @@ func (r *likeRepository) GetLikesByID(contentID uint, contentType entity.Content
 }
 
 func (r *likeRepository) DeleteLikes(id uint, contentType entity.ContentType) error {
-	return r.db.Where("content_id = ? AND content_type = ?", id, contentType).Delete(&entity.Like{}).Error
+	result := r.db.Where("content_id = ? AND content_type = ?", id, contentType).Delete(&entity.Like{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil
+	}
+	return nil
+}
+
+func (r *likeRepository) ListCommentLikesByParentID(parentID uint) ([]*entity.Like, error) {
+	var likes []*entity.Like
+	if err := r.db.Model(&entity.Like{}).Where("parent_id = ?", parentID).Find(&likes).Error; err != nil {
+		return nil, err
+	}
+
+	return likes, nil
+}
+
+func (r *likeRepository) GetCountOfLikes(id uint, contentType entity.ContentType) int64 {
+	var count int64
+	if err := r.db.Model(&entity.Like{}).Where("content_id = ? AND content_type = ?", id, contentType).Count(&count).Error; err != nil {
+		return 0
+	}
+	return count
 }
 
 func (r *likeRepository) Migration() error {

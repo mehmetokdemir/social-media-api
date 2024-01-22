@@ -12,7 +12,8 @@ type ILikeService interface {
 	DeleteLikesByPostID(postID uint) error
 	GetCommentsLikeByID(commentID uint) ([]*entity.Like, error)
 	GetPostsLikeByID(postID uint) ([]*entity.Like, error)
-
+	GetPostCountLikeByID(postID uint) int64
+	GetCommentCountLikeByID(commentID uint) int64
 	LikePost(userID, postID uint) error
 	LikeComment(userID, commentID uint) error
 }
@@ -35,7 +36,6 @@ func NewLikeService(likeRepository ILikeRepository, logger *zap.SugaredLogger, c
 }
 
 func (s *likeService) DeleteLikesByCommentID(commentID uint) error {
-
 	return s.likeRepository.DeleteLikes(commentID, entity.ContentTypeComment)
 }
 
@@ -97,6 +97,13 @@ func (s *likeService) GetCommentsLikeByID(commentID uint) ([]*entity.Like, error
 		return nil, err
 	}
 	return likes, nil
+}
+
+func (s *likeService) GetPostCountLikeByID(postID uint) int64 {
+	return s.likeRepository.GetCountOfLikes(postID, entity.ContentTypePost)
+}
+func (s *likeService) GetCommentCountLikeByID(commentID uint) int64 {
+	return s.likeRepository.GetCountOfLikes(commentID, entity.ContentTypeComment)
 }
 
 func (s *likeService) GetPostsLikeByID(postID uint) ([]*entity.Like, error) {

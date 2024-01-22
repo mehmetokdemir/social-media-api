@@ -14,10 +14,12 @@ type ICommentRepository interface {
 	Delete(id uint) error
 	DeleteCommentsByPostID(postID uint) error
 	List() ([]*entity.Comment, error)
-	ListCommentsByPostID(postID uint) ([]*entity.Comment, error)
+	ListCommentsByPostID(postID uint) ([]entity.Comment, error)
+	ListMainCommentsByPostID(postID uint) ([]entity.Comment, error)
 	IsPostExist(postID uint) bool
 
-	DeleteCommentsWithSubComments(commendID uint) error
+	ListCommentsByParentID(parentCommentID uint) ([]entity.Comment, error)
+	DeleteCommentsByParentID(parentCommentID uint) error
 
 	Migration() error
 }
@@ -41,19 +43,6 @@ func (r *commentRepository) Create(comment entity.Comment) (*entity.Comment, err
 	return &comment, nil
 }
 
-func (r *commentRepository) DeleteCommentsWithSubComments(commentID uint) error {
-	err := r.db.Model(&entity.Comment{}).Where("id = ? OR parent_id = ?", commentID, commentID).Delete(nil).Error
-	if err != nil {
-		return err
-	}
-
-	if r.db.RowsAffected == 0 {
-		return nil
-	}
-
-	return nil
-}
-
 func (r *commentRepository) Update(comment entity.Comment) (*entity.Comment, error) {
 	if err := r.db.Model(entity.Comment{}).Where("id =?", comment.ID).Updates(comment).Error; err != nil {
 		return nil, err
@@ -74,6 +63,17 @@ func (r *commentRepository) Delete(id uint) error {
 	return nil
 }
 
+func (r *commentRepository) DeleteCommentsByParentID(id uint) error {
+	result := r.db.Where("parent_id = ? ", id).Delete(&entity.Comment{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil
+	}
+	return nil
+}
+
 func (r *commentRepository) List() ([]*entity.Comment, error) {
 	var comments []*entity.Comment
 	if err := r.db.Model(&entity.Comment{}).Find(&comments).Error; err != nil {
@@ -83,12 +83,28 @@ func (r *commentRepository) List() ([]*entity.Comment, error) {
 	return comments, nil
 }
 
-func (r *commentRepository) ListCommentsByPostID(postID uint) ([]*entity.Comment, error) {
-	var comments []*entity.Comment
-	if err := r.db.Model(&entity.Comment{}).Where("post_id = ?", postID).Find(&comments).Error; err != nil {
+func (r *commentRepository) ListCommentsByParentID(commentParentID uint) ([]entity.Comment, error) {
+	var comments []entity.Comment
+	if err := r.db.Preload("User").Model(&entity.Comment{}).Where("parent_id = ? ", commentParentID).Order("created_at DESC").Find(&comments).Error; err != nil {
 		return nil, err
 	}
 
+	return comments, nil
+}
+
+func (r *commentRepository) ListCommentsByPostID(postID uint) ([]entity.Comment, error) {
+	var comments []entity.Comment
+	if err := r.db.Preload("User").Model(&entity.Comment{}).Where("post_id = ?", postID).Order("created_at DESC").Find(&comments).Error; err != nil {
+		return nil, err
+	}
+	return comments, nil
+}
+
+func (r *commentRepository) ListMainCommentsByPostID(postID uint) ([]entity.Comment, error) {
+	var comments []entity.Comment
+	if err := r.db.Preload("User").Model(&entity.Comment{}).Where("post_id = ? AND parent_id IS NULL", postID).Order("created_at DESC").Find(&comments).Error; err != nil {
+		return nil, err
+	}
 	return comments, nil
 }
 
@@ -108,8 +124,12 @@ func (r *commentRepository) Get(id uint) (comment *entity.Comment, err error) {
 }
 
 func (r *commentRepository) DeleteCommentsByPostID(postID uint) error {
-	if err := r.db.Where("post_id = ?", postID).Delete(&entity.Comment{}).Error; err != nil {
-		return err
+	result := r.db.Where("post_id = ?", postID).Delete(&entity.Comment{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil
 	}
 	return nil
 }
